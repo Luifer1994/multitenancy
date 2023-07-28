@@ -34,7 +34,11 @@ class CreatePermissionsManyTenantCommand extends Command
 
         try {
             Tenant::all()->runForEach(function () {
-                Artisan::call('create-permissions');
+                $this->call('create-permission-users');
+                $this->call('create-permission-dashboard');
+                $this->call('create-permission-roles-and-permissions');
+                $this->call('create-permission-cities');
+                $this->call('create-permission-document-types');
             });
             $this->line('Permissions created successfully.');
         } catch (\Throwable $th) {

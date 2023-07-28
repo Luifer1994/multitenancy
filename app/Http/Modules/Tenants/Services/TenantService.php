@@ -9,10 +9,7 @@ use Database\Seeders\CountrySeeder;
 use Database\Seeders\DepartmentSeeder;
 use Database\Seeders\DocumentTypeSeeder;
 use Database\Seeders\UserSeeder;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class TenantService
 {
@@ -21,7 +18,7 @@ class TenantService
 
     public function __construct(TenantRepository $TenantRepository)
     {
-        $this->TenantRepository       = $TenantRepository;
+        $this->TenantRepository = $TenantRepository;
     }
 
     /**
@@ -43,7 +40,6 @@ class TenantService
                 'domain' => $request->id . '.localhost',
             ]);
 
-
             $newTenant->run(function () {
                 Artisan::call('db:seed', ['--class' => DocumentTypeSeeder::class]);
                 Artisan::call('db:seed', ['--class' => UserSeeder::class]);
@@ -51,7 +47,6 @@ class TenantService
                 Artisan::call('db:seed', ['--class' => DepartmentSeeder::class]);
                 Artisan::call('create-permissions');
             });
-
 
             return [
                 'status'    => true,

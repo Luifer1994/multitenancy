@@ -49,6 +49,7 @@ class AuthService
             'data' => [
                 'token' => $token,
                 'user' => $userLogged,
+                'tenant' => tenancy()
             ],
             'code' => Response::HTTP_OK,
         ];

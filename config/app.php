@@ -168,13 +168,13 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        App\Providers\TenancyServiceProvider::class,
 
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
         //Auditing
         OwenIt\Auditing\AuditingServiceProvider::class,
         //Laravel permissions
         Spatie\Permission\PermissionServiceProvider::class,
+        App\Providers\TenancyServiceProvider::class, // <-- here
     ])->toArray(),
 
     /*
