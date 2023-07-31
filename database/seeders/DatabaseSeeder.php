@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
                 DepartmentSeeder::class
             ]
         );
-        Artisan::call('jwt:secret');
+        Artisan::call('passport:install');
         Artisan::call('create-permissions');
     }
 }

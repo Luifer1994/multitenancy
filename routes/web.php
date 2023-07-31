@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Modules\Tenants\Models\Tenant;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,5 +16,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
+
+   /*  $id = 'qassssqss';
+
+    Artisan::call('install-passport-tenant', ['tenantId' => $id]); */
+
     return view('welcome');
 });

@@ -3,10 +3,11 @@
 namespace App\Http\Modules\Auth\Services;
 
 use App\Http\Modules\Auth\Requests\LoginRequest;
+use App\Http\Modules\Users\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use JWTAuth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthService
 {
@@ -22,37 +23,28 @@ class AuthService
      */
     public function login(LoginRequest $request): array
     {
-        $credentials = $request->only('email', 'password');
-        if (!$token = JWTAuth::attempt($credentials)) {
+        $user = User::where('email', $request->email)->first();
+
+        if ($user && Hash::check($request->password, $user->password)) {
+            $token = $user->createToken('Laravel')->accessToken;
+
+            return [
+                'res' => true,
+                'message' => 'Usuario logeado con éxito',
+                'data' => [
+                    'token' => $token,
+                    'user' => $user,
+                    'tenant' => tenancy()
+                ],
+                'code' => Response::HTTP_OK,
+            ];
+        } else {
             return [
                 'res' => false,
                 'message' => 'Credenciales incorrectas',
                 'code' => Response::HTTP_UNAUTHORIZED,
-                'data' => null,
             ];
         }
-        $user = Auth::user();
-        $user->getPermissionsViaRoles();
-        $roles       = collect($user->roles->pluck('description'))->flatten()->toArray();
-        $permissions = collect($user->getAllPermissions());
-        $permissions = collect($permissions)->pluck('name')->flatten()->toArray();
-        $userLogged = collect([
-            'id'          => $user->id,
-            'name'        => $user->name . ' ' . $user->last_name,
-            'email'       => $user->email,
-            'roles'       => base64_encode(json_encode($roles)),
-            'permissions' => base64_encode(json_encode($permissions)),
-        ]);
-        return [
-            'res' => true,
-            'message' => 'Usuario logeado con éxito',
-            'data' => [
-                'token' => $token,
-                'user' => $userLogged,
-                'tenant' => tenancy()
-            ],
-            'code' => Response::HTTP_OK,
-        ];
     }
 
     /**
@@ -61,23 +53,17 @@ class AuthService
      * @param Request $request
      * @return Array
      */
-    public function logout(Request $request): array
+    public function logout(Request $request) //: array
     {
-        try {
-            JWTAuth::invalidate($request->token);
-            return [
-                'res' => true,
-                'message' => 'Usuario desconectado',
-                'code' => Response::HTTP_OK,
-                'data' => null
-            ];
-        } catch (\Throwable $th) {
-            return [
-                'res' => false,
-                'message' => $th->getMessage(),
-                'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'data' => null
-            ];
-        }
+        //Obtenemos usuario logeado
+        $user = Auth::user();
+        //Busca todos los token del usuario en la base de datos y los eliminamos;
+        $user->tokens->each(function ($token) {
+            $token->delete();
+        });
+        return response()->json([
+            'res' => true,
+            'message' => 'Hasta la vista Baby',
+        ], 200);
     }
 }

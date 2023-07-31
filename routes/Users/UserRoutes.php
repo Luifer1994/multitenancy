@@ -10,7 +10,7 @@ use App\Http\Modules\Users\Controllers\UserController;
 */
 
 Route::prefix('users')->group(function () {
-    Route::group(['middleware' => 'jwt.verify'], function () {
+    Route::group(['middleware' => 'auth:api'], function () {
         Route::controller(UserController::class)->group(function () {
             Route::get('list', 'index')->middleware('permission:users-list');
             Route::get('show/{id}', 'show')->middleware('permission:users-show');

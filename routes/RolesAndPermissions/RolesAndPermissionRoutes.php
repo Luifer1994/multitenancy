@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('roles')->group(function () {
-    Route::group(['middleware' => 'jwt.verify'], function () {
+    Route::group(['middleware' => 'auth:api'], function () {
         Route::controller(RoleController::class)->group(function () {
             Route::get('list', 'index')->middleware('permission:list-roles');
             Route::get('show/{id}', 'show')->middleware('permission:show-roles');
@@ -22,7 +22,7 @@ Route::prefix('roles')->group(function () {
     });
 });
 Route::prefix('permissions')->group(function () {
-    Route::group(['middleware' => 'jwt.verify'], function () {
+    Route::group(['middleware' => 'auth:api'], function () {
         Route::controller(PermissionController::class)->group(function () {
             Route::get('group-to-permission', 'getGroupPermissionsByGroup')->middleware('permission:list-groups-to-permissions');
             Route::get('list-by-group/{group}/{rolId}', 'getPermissionsByGroup')->middleware('permission:list-permissions-by-group');

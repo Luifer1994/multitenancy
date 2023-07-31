@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('clients')->group(function () {
-    Route::group(['middleware' => 'jwt.verify'], function () {
+    Route::group(['middleware' => 'auth:api'], function () {
         Route::controller(ClientController::class)->group(function () {
             Route::get('list', 'index')->middleware('permission:clients-list');
             Route::get('show/{id}', 'show')->middleware('permission:clients-show');

@@ -5,11 +5,9 @@ namespace App\Http\Modules\Tenants\Services;
 use App\Http\Modules\Tenants\Models\Tenant;
 use App\Http\Modules\Tenants\Repositories\TenantRepository;
 use App\Http\Modules\Tenants\Requests\CreateTenantRequest;
-use Database\Seeders\CountrySeeder;
-use Database\Seeders\DepartmentSeeder;
-use Database\Seeders\DocumentTypeSeeder;
-use Database\Seeders\UserSeeder;
+use Database\Seeders\TenantSeeder;
 use Illuminate\Support\Facades\Artisan;
+use Laravel\Passport\ClientRepository;
 
 class TenantService
 {
@@ -28,37 +26,33 @@ class TenantService
      * @return array
      */
     public function createTenant(CreateTenantRequest $request): array
-    {
-        try {
-            $request->merge([
-                'user_created_id' => auth()->user()->id,
-            ]);
+{
+    try {
+        $userCreatedId = auth()->user()->id;
+        $newTenant = $this->TenantRepository->save(new Tenant(array_merge($request->all(), ['user_created_id' => $userCreatedId])));
+        $domain = $request->id . '.localhost';
 
-            $newTenant = $this->TenantRepository->save(new Tenant($request->all()));
+        $newTenant->domains()->create(['domain' => $domain]);
 
-            $newTenant->domains()->create([
-                'domain' => $request->id . '.localhost',
-            ]);
+        $newTenant->run(function () use ($domain, $newTenant) {
+            Artisan::call('db:seed', ['--class' => TenantSeeder::class]);
+            $clientRepo = new ClientRepository();
+            $clientRepo->createPasswordGrantClient(null, $newTenant->id, $domain, 'users');
+            $clientRepo->createPersonalAccessClient(null, $newTenant->id, $domain, 'users');
+        });
 
-            $newTenant->run(function () {
-                Artisan::call('db:seed', ['--class' => DocumentTypeSeeder::class]);
-                Artisan::call('db:seed', ['--class' => UserSeeder::class]);
-                Artisan::call('db:seed', ['--class' => CountrySeeder::class]);
-                Artisan::call('db:seed', ['--class' => DepartmentSeeder::class]);
-                Artisan::call('create-permissions');
-            });
-
-            return [
-                'status'    => true,
-                'message'   => 'Tenant created successfully.',
-                'data'      => $newTenant,
-            ];
-        } catch (\Throwable $th) {
-            return [
-                'status'    => false,
-                'message'   => $th->getMessage(),
-                'data'      => null,
-            ];
-        }
+        return [
+            'status' => true,
+            'message' => 'Tenant created successfully.',
+            'data' => $newTenant,
+        ];
+    } catch (\Throwable $th) {
+        return [
+            'status' => false,
+            'message' => $th->getMessage(),
+            'data' => null,
+        ];
     }
+}
+
 }

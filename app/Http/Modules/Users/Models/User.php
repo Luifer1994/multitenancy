@@ -6,12 +6,10 @@ use App\Http\Modules\DocumentTypes\Models\DocumentType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
-use \OwenIt\Auditing\Auditable;
 use Spatie\Permission\Traits\HasRoles;
+use Laravel\Passport\HasApiTokens;
 
 /**
  * Class User
@@ -36,11 +34,12 @@ use Spatie\Permission\Traits\HasRoles;
  *
  * @property DocumentType $document_type
  */
-class User extends Authenticatable implements JWTSubject, AuditableContract
+class User extends Authenticatable
 {
-    use HasFactory, Notifiable, Auditable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, HasApiTokens;
 
     protected $table = 'users';
+    protected array $guard_name = ['api', 'web'];
 
     protected $casts = [
         'document_type_id' => 'int',
@@ -73,15 +72,6 @@ class User extends Authenticatable implements JWTSubject, AuditableContract
         'remember_token',
         'changed_at'
     ];
-
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
-    }
-    public function getJWTCustomClaims()
-    {
-        return [];
-    }
 
     /**
      * Relationship with DocumentType.
