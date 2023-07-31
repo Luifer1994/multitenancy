@@ -27,7 +27,7 @@ class Handler extends ExceptionHandler
     {
 
         if ($exception instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
-            return response()->json(["res" => false, "message" => "Error de autorización, no tiene permisos"], 403);
+            return response()->json(["res" => false, "message" => "Error de autenticación"], 401);
         }
         if ($exception instanceof RouteNotFoundException) {
             return response()->json(["res" => false, "message" => "Error de autenticación"], 401);
